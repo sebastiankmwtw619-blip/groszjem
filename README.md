@@ -34,3 +34,12 @@ Bary mleczne i tanie obiady w Polsce według województw. Aplikacja webowa (PWA)
 | `sw.js` | Działanie bez internetu |
 | `supabase.sql` | Schemat wspólnej bazy |
 | `make_icons.py` | Generuje ikony |
+
+## Moderacja
+
+Panel: https://sebastiankmwtw619-blip.github.io/groszjem/admin.html (logowanie linkiem e-mail, tylko adresy z tabeli `moderators`).
+
+- **Zgłoszenia lokali:** zatwierdź (znika oznaczenie „niezweryfikowany”), odrzuć (znika z aplikacji) albo usuń.
+- **Ceny:** ukryj, przywróć albo usuń.
+- Reguły bazy są w `supabase-moderation.sql`. Nowego moderatora dodasz w Supabase SQL Editor:
+  `insert into moderators (email) values ('adres@przyklad.pl');`

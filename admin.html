@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grosz.jem · Moderacja</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#121212">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<style>
+:root {
+  --bg: #121212; --surface: #1F1F1F; --surface-2: #2A2A2A; --line: #333333;
+  --fg: #F5F5F5; --muted: #B3B3B3; --faint: #9A9A9A;
+  --accent: #FFD43B; --on-accent: #121212; --ok: #7DD3A0; --warn: #FFB07A; --bad: #FF8A80;
+  --display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --body: Inter, 'Segoe UI', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+button, input { font-family: inherit; font-size: inherit; color: inherit; }
+input { font-size: 16px; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.page { max-width: 760px; margin: 0 auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 16px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+h1 { margin: 0; font-family: var(--display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+h1 span { color: var(--accent); }
+h1 small { font-family: var(--body); font-size: 14px; font-weight: 500; color: var(--muted); letter-spacing: 0; margin-left: 6px; }
+.who { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.box { background: var(--surface); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.box p { margin: 0; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+.field input { height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); padding: 0 14px; width: 100%; }
+.btn { height: 48px; border-radius: 12px; border: 0; background: var(--accent); color: var(--on-accent); font-weight: 700; cursor: pointer; padding: 0 18px; }
+.btn[disabled] { opacity: .5; cursor: default; }
+.btn.ghost { background: var(--surface-2); color: var(--fg); height: 36px; font-size: 13px; font-weight: 600; padding: 0 12px; }
+.btn.sm { height: 36px; font-size: 13px; padding: 0 12px; }
+.btn.ok { background: var(--ok); color: #0E2A1A; }
+.btn.bad { background: transparent; color: var(--bad); border: 1px solid #5A3330; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab { height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.tab[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.count { min-width: 22px; height: 22px; border-radius: 11px; padding: 0 6px; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; background: var(--surface-2); color: var(--fg); font-variant-numeric: tabular-nums; }
+.tab[aria-pressed="true"] .count { background: rgba(0,0,0,.15); color: var(--on-accent); }
+.list { display: flex; flex-direction: column; gap: 10px; }
+.item { background: var(--surface); border-radius: 16px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.item .info { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.item .name { font-weight: 600; font-size: 16px; }
+.item .sub { font-size: 13px; color: var(--muted); }
+.item .meta { font-size: 12px; color: var(--faint); }
+.item .acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.status { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 2px 6px; border-radius: 6px; background: var(--surface-2); margin-left: 6px; vertical-align: 2px; }
+.status.pending { color: var(--warn); } .status.approved, .status.visible { color: var(--ok); } .status.rejected, .status.hidden { color: var(--bad); }
+.price { font-family: var(--display); font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.empty { padding: 24px; border: 1.5px dashed #444; border-radius: 16px; text-align: center; color: var(--muted); }
+.msg { font-size: 14px; margin: 0; }
+.msg.err { color: var(--bad); } .msg.ok { color: var(--ok); }
+.confirm { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--bad); flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <h1>Grosz<span>.</span>jem<small>moderacja</small></h1>
+    <div class="who" id="who" hidden><span id="whoEmail"></span><button type="button" class="btn ghost" id="logout">Wyloguj</button><a href="./">Do aplikacji</a></div>
+  </div>
+
+  <section class="box" id="loginBox" hidden>
+    <h2 style="margin:0;font-family:var(--display);font-size:20px">Zaloguj się</h2>
+    <p>Wyślemy link logowania na Twój adres. Panel działa tylko dla adresów z listy moderatorów.</p>
+    <form id="loginForm" class="field" novalidate>
+      <label for="email">E-mail moderatora</label>
+      <input id="email" type="email" autocomplete="email" required placeholder="adres@przyklad.pl">
+      <button type="submit" class="btn" style="margin-top:8px">Wyślij link logowania</button>
+    </form>
+    <p id="loginMsg" class="msg" hidden></p>
+  </section>
+
+  <section class="box" id="denied" hidden>
+    <p>To konto nie jest na liście moderatorów, więc nie może zmieniać zgłoszeń.</p>
+  </section>
+
+  <section id="panel" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="tabs" role="group" aria-label="Widok">
+      <button type="button" class="tab" data-tab="pending" aria-pressed="true">Do sprawdzenia <span class="count" id="cPending">0</span></button>
+      <button type="button" class="tab" data-tab="approved" aria-pressed="false">Zatwierdzone <span class="count" id="cApproved">0</span></button>
+      <button type="button" class="tab" data-tab="rejected" aria-pressed="false">Odrzucone <span class="count" id="cRejected">0</span></button>
+      <button type="button" class="tab" data-tab="prices" aria-pressed="false">Ceny <span class="count" id="cPrices">0</span></button>
+    </div>
+    <p id="panelMsg" class="msg" hidden></p>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var W = ['Zachodniopomorskie','Pomorskie','Warmińsko-mazurskie','Podlaskie','Lubuskie','Wielkopolskie','Kujawsko-pomorskie','Mazowieckie','Dolnośląskie','Łódzkie','Świętokrzyskie','Lubelskie','Opolskie','Śląskie','Małopolskie','Podkarpackie'];
+  var cfg = window.GJ_CONFIG || {};
+  var $ = function (id) { return document.getElementById(id); };
+  var sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  var S = { tab: 'pending', subs: [], prices: [], places: {}, confirm: null };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function zl(n) { return n == null ? '' : Number(n).toFixed(2).replace('.', ',').replace(',00', '') + ' zł'; }
+  function when(t) { var d = new Date(t); return isNaN(d) ? '' : d.toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  function msg(el, text, kind) { el.textContent = text; el.className = 'msg ' + (kind || ''); el.hidden = !text; }
+
+  function show(which) {
+    $('loginBox').hidden = which !== 'login';
+    $('denied').hidden = which !== 'denied';
+    $('panel').hidden = which !== 'panel';
+    $('who').hidden = which === 'login';
+  }
+
+  $('loginForm').onsubmit = function (e) {
+    e.preventDefault();
+    var email = $('email').value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return msg($('loginMsg'), 'Wpisz poprawny adres e-mail.', 'err');
+    var b = e.target.querySelector('button'); b.disabled = true; b.textContent = 'Wysyłam…';
+    sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: location.origin + location.pathname } }).then(function (r) {
+      b.disabled = false; b.textContent = 'Wyślij link logowania';
+      if (r.error) {
+        var t = /rate|limit|seconds/i.test(r.error.message) ? 'Za dużo prób. Odczekaj kilka minut i spróbuj ponownie.' : 'Nie udało się wysłać linku: ' + r.error.message;
+        return msg($('loginMsg'), t, 'err');
+      }
+      msg($('loginMsg'), 'Link wysłany na ' + email + '. Otwórz go na tym urządzeniu (sprawdź też Spam).', 'ok');
+    });
+  };
+
+  $('logout').onclick = function () { sb.auth.signOut().then(function () { show('login'); }); };
+
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.onclick = function () {
+      S.tab = t.dataset.tab; S.confirm = null;
+      document.querySelectorAll('.tab').forEach(function (x) { x.setAttribute('aria-pressed', String(x === t)); });
+      render();
+    };
+  });
+
+  function load() {
+    return Promise.all([
+      sb.from('submissions').select('*').order('created_at', { ascending: false }).limit(1000),
+      sb.from('prices').select('*').order('created_at', { ascending: false }).limit(1000)
+    ]).then(function (r) {
+      if (r[0].error || r[1].error) throw r[0].error || r[1].error;
+      S.subs = r[0].data; S.prices = r[1].data; render();
+    }).catch(function (err) { msg($('panelMsg'), 'Nie udało się wczytać danych: ' + (err && err.message || 'błąd połączenia'), 'err'); });
+  }
+
+  function placeName(id) {
+    if (S.places[id]) return S.places[id];
+    if (id.indexOf('sub-') === 0) { var s = S.subs.filter(function (x) { return 'sub-' + x.id === id; })[0]; if (s) return s.name + ' · ' + s.city + ' (zgłoszenie)'; }
+    return id;
+  }
+
+  function render() {
+    var by = function (st) { return S.subs.filter(function (s) { return s.status === st; }); };
+    $('cPending').textContent = by('pending').length;
+    $('cApproved').textContent = by('approved').length;
+    $('cRejected').textContent = by('rejected').length;
+    $('cPrices').textContent = S.prices.length;
+    var html;
+    if (S.tab === 'prices') {
+      html = S.prices.length ? S.prices.map(priceItem).join('') : '<div class="empty">Nikt jeszcze nie zgłosił ceny.</div>';
+    } else {
+      var list = by(S.tab);
+      var empty = { pending: 'Brak zgłoszeń do sprawdzenia.', approved: 'Nie ma zatwierdzonych zgłoszeń.', rejected: 'Nie ma odrzuconych zgłoszeń.' }[S.tab];
+      html = list.length ? list.map(subItem).join('') : '<div class="empty">' + empty + '</div>';
+    }
+    $('list').innerHTML = html;
+    $('list').querySelectorAll('[data-act]').forEach(function (b) { b.onclick = function () { act(b.dataset.act, b.dataset.id); }; });
+  }
+
+  var LABEL = { pending: 'oczekuje', approved: 'zatwierdzone', rejected: 'odrzucone', visible: 'widoczna', hidden: 'ukryta' };
+  function delBlock(kind, id) {
+    if (S.confirm === kind + ':' + id) return '<span class="confirm">Usunąć na zawsze? <button type="button" class="btn bad sm" data-act="' + kind + '-del-yes" data-id="' + id + '">Usuń</button><button type="button" class="btn ghost" data-act="cancel" data-id="' + id + '">Anuluj</button></span>';
+    return '<button type="button" class="btn bad sm" data-act="' + kind + '-del" data-id="' + id + '">Usuń</button>';
+  }
+  function subItem(s) {
+    var acts = '';
+    if (s.status !== 'approved') acts += '<button type="button" class="btn ok sm" data-act="approve" data-id="' + s.id + '">Zatwierdź</button>';
+    if (s.status !== 'rejected') acts += '<button type="button" class="btn ghost" data-act="reject" data-id="' + s.id + '">Odrzuć</button>';
+    if (s.status !== 'pending') acts += '<button type="button" class="btn ghost" data-act="pending" data-id="' + s.id + '">Cofnij do sprawdzenia</button>';
+    acts += delBlock('sub', s.id);
+    var q = encodeURIComponent(s.name + ' ' + (s.address || '') + ' ' + s.city);
+    return '<div class="item"><div class="info"><span class="name">' + esc(s.name) + '<span class="status ' + s.status + '">' + LABEL[s.status] + '</span></span>' +
+      '<span class="sub">' + esc(s.type) + ' · ' + esc(s.city) + (s.address ? ', ' + esc(s.address) : '') + ' · ' + esc(W[s.voiv] || '') + (s.price != null ? ' · <span class="price">' + zl(s.price) + '</span>' : '') + '</span>' +
+      '<span class="meta">Zgłoszono ' + when(s.created_at) + (s.moderated_at ? ' · decyzja ' + when(s.moderated_at) : '') + ' · <a href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">sprawdź w Google Maps</a></span></div>' +
+      '<div class="acts">' + acts + '</div></div>';
+  }
+  function priceItem(p) {
+    var acts = p.status === 'visible' ? '<button type="button" class="btn ghost" data-act="hide" data-id="' + p.id + '">Ukryj</button>' : '<button type="button" class="btn ok sm" data-act="show" data-id="' + p.id + '">Przywróć</button>';
+    acts += delBlock('price', p.id);
+    return '<div class="item"><div class="info"><span class="name"><span class="price">' + zl(p.price) + '</span> · ' + esc(p.dish || p.kind) + '<span class="status ' + p.status + '">' + LABEL[p.status] + '</span></span>' +
+      '<span class="sub">' + esc(placeName(p.place_id)) + '</span>' +
+      '<span class="meta">' + esc(p.kind) + ' · cena z dnia ' + esc(p.date) + ' · zgłoszono ' + when(p.created_at) + '</span></div>' +
+      '<div class="acts">' + acts + '</div></div>';
+  }
+
+  function act(a, id) {
+    if (a === 'cancel') { S.confirm = null; return render(); }
+    if (a === 'sub-del' || a === 'price-del') { S.confirm = (a === 'sub-del' ? 'sub:' : 'price:') + id; return render(); }
+    var op;
+    if (a === 'approve' || a === 'reject' || a === 'pending') op = sb.from('submissions').update({ status: a === 'approve' ? 'approved' : a === 'reject' ? 'rejected' : 'pending', moderated_at: a === 'pending' ? null : new Date().toISOString() }).eq('id', id).select();
+    else if (a === 'hide' || a === 'show') op = sb.from('prices').update({ status: a === 'hide' ? 'hidden' : 'visible' }).eq('id', id).select();
+    else if (a === 'sub-del-yes') op = sb.from('submissions').delete().eq('id', id).select();
+    else if (a === 'price-del-yes') op = sb.from('prices').delete().eq('id', id).select();
+    if (!op) return;
+    S.confirm = null;
+    document.querySelectorAll('[data-id="' + id + '"]').forEach(function (b) { b.disabled = true; });
+    op.then(function (r) {
+      if (r.error) return msg($('panelMsg'), 'Nie udało się zapisać zmiany: ' + r.error.message, 'err');
+      if (!r.data || !r.data.length) return msg($('panelMsg'), 'Zmiana nie została zapisana. Sprawdź, czy jesteś zalogowany jako moderator.', 'err');
+      var done = { approve: 'Zatwierdzono.', reject: 'Odrzucono.', pending: 'Przywrócono do sprawdzenia.', hide: 'Cena ukryta.', show: 'Cena przywrócona.', 'sub-del-yes': 'Zgłoszenie usunięte.', 'price-del-yes': 'Cena usunięta.' }[a];
+      msg($('panelMsg'), done, 'ok');
+      return load();
+    });
+  }
+
+  function start(session) {
+    if (!session) return show('login');
+    $('whoEmail').textContent = session.user.email;
+    sb.rpc('is_moderator').then(function (r) {
+      if (r.error || !r.data) return show('denied');
+      show('panel');
+      if (location.hash.indexOf('access_token') >= 0) history.replaceState(null, '', location.pathname);
+      fetch('places.json').then(function (x) { return x.json(); }).then(function (ps) { ps.forEach(function (p) { S.places[p.id] = p.name + ' · ' + p.city; }); render(); }).catch(function () {});
+      load();
+    });
+  }
+
+  var started = false;
+  sb.auth.onAuthStateChange(function (ev, session) {
+    if (ev === 'SIGNED_IN' && !started) { started = true; start(session); }
+    if (ev === 'SIGNED_OUT') { started = false; show('login'); }
+  });
+  sb.auth.getSession().then(function (r) { if (!started) { started = true; start(r.data.session); } });
+  setInterval(function () { if (!$('panel').hidden && !S.confirm) load(); }, 60000);
+})();
+</script>
+</body>
+</html>

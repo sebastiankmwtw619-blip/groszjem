@@ -166,7 +166,7 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
         if (r[0].error || r[1].error) throw r[0].error || r[1].error;
         var data = {
           prices: r[0].data.map(function (p) { return { id: p.id, placeId: p.place_id, price: Number(p.price), date: p.date, kind: p.kind, dish: p.dish, createdAt: Date.parse(p.created_at) }; }),
-          subs: r[1].data.map(function (s) { return { id: s.id, name: s.name, city: s.city, address: s.address, voiv: s.voiv, type: s.type, price: s.price == null ? null : Number(s.price), createdAt: Date.parse(s.created_at) }; })
+          subs: r[1].data.filter(function (s) { return s.status !== 'rejected'; }).map(function (s) { return { id: s.id, name: s.name, city: s.city, address: s.address, voiv: s.voiv, type: s.type, price: s.price == null ? null : Number(s.price), status: s.status, createdAt: Date.parse(s.created_at) }; })
         };
         lsSet('gj-cache', data);
         return data;
@@ -198,12 +198,13 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
   function allPlaces() {
     var verified = S.places.map(function (p) { return Object.assign({ kind: 'verified' }, p); });
     var subs = S.subs.map(function (s) {
-      return { id: 'sub-' + s.id, name: s.name, city: s.city, address: s.address, voiv: s.voiv, type: s.type, price: typeof s.price === 'number' ? s.price : null, priceLabel: '', source: 'zgłoszenie użytkownika', kind: 'sub' };
+      var ok = s.status === 'approved';
+      return { id: 'sub-' + s.id, name: s.name, city: s.city, address: s.address, voiv: s.voiv, type: s.type, price: typeof s.price === 'number' ? s.price : null, priceLabel: '', source: ok ? 'zgłoszenie użytkownika, zatwierdzone' : 'zgłoszenie użytkownika', kind: ok ? 'approved' : 'sub' };
     });
     return verified.concat(subs).map(function (p) {
       var reps = pricesFor(p.id);
       if (reps.length) { p.eff = reps[0].price; p.effLabel = zl(reps[0].price); p.effBy = 'user'; }
-      else if (typeof p.price === 'number') { p.eff = p.price; p.effLabel = p.priceLabel || zl(p.price); p.effBy = p.kind === 'sub' ? 'user' : 'source'; }
+      else if (typeof p.price === 'number') { p.eff = p.price; p.effLabel = p.priceLabel || zl(p.price); p.effBy = p.kind === 'verified' ? 'source' : 'user'; }
       else { p.eff = null; p.effLabel = p.priceLabel || 'cena ?'; p.effBy = p.priceLabel ? 'source' : null; }
       return p;
     });
@@ -297,7 +298,7 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
       '<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">' + ICON.nav + 'Prowadź (Google Maps)</a>' +
       '<div class="rows"><h3 style="padding-bottom:4px">Informacje</h3>' +
       '<div class="row"><span>Źródło</span><span>' + esc(p.source) + '</span></div>' +
-      (p.priceLabel && p.kind !== 'sub' ? '<div class="row"><span>Cena wg źródła</span><span>' + esc(p.priceLabel) + '</span></div>' : '') +
+      (p.priceLabel && p.kind === 'verified' ? '<div class="row"><span>Cena wg źródła</span><span>' + esc(p.priceLabel) + '</span></div>' : '') +
       '<div class="row"><span>Zgłoszenia cen</span><span>' + reps.length + ' od użytkowników</span></div></div>' +
       '<div><h3>Zgłoszone ceny</h3>' + hist + '</div>' +
       '<button type="button" class="btn" data-go="cena" data-id="' + esc(p.id) + '">Dodaj aktualną cenę</button></main>';
@@ -324,7 +325,7 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
 
   function viewReport() {
     if (S.flash === 'sub-ok') {
-      return '<main class="wrap"><div class="done"><div class="tick">' + ICON.tick + '</div><h2 class="mid">Zgłoszenie wysłane</h2><p style="color:var(--muted);margin:0">Lokal jest już na liście z oznaczeniem „niezweryfikowany”.</p>' +
+      return '<main class="wrap"><div class="done"><div class="tick">' + ICON.tick + '</div><h2 class="mid">Zgłoszenie wysłane</h2><p style="color:var(--muted);margin:0">Lokal jest już na liście z oznaczeniem „niezweryfikowany”, dopóki nie sprawdzi go moderator.</p>' +
         '<button type="button" class="btn ghost" data-go="zglos">Zgłoś kolejny</button></div></main>';
     }
     return '<header class="top wrap"><h2 class="mid" style="font-size:26px">Zgłoś tani lokal</h2><p style="margin:0;color:var(--muted)">Brakuje nam danych z lubuskiego i podkarpackiego.</p></header>' +

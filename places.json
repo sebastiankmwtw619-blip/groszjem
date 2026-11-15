@@ -34,5 +34,6 @@
 {"id":"motylek-skawina","name":"Bar Motylek (Społem)","city":"Skawina","address":"ul. Słowackiego 1","voiv":14,"price":24,"priceLabel":"obiad dnia 24 zł","source":"skawina.spolem.org.pl (menu 9–13.11.2026)","type":"Jadłodajnia"},
 {"id":"tu-i-tam-skawina","name":"Bistro Tu i Tam","city":"Skawina","address":"ul. Krakowska 23b","voiv":14,"price":17,"priceLabel":"zestaw od 17 zł","source":"citymenu.pl","type":"Jadłodajnia"},
 {"id":"pio-catering-skawina","name":"Pio Catering","city":"Skawina","address":"ul. Batalionów Chłopskich 15G","voiv":14,"price":null,"priceLabel":"","source":"dowozimy.pl","type":"Jadłodajnia"},
-{"id":"staromiejska-skawina","name":"Staromiejska","city":"Skawina","address":"ul. gen. Władysława Sikorskiego 16","voiv":14,"price":null,"priceLabel":"","source":"dowozimy.pl","type":"Restauracja"}
+{"id":"staromiejska-skawina","name":"Staromiejska","city":"Skawina","address":"ul. gen. Władysława Sikorskiego 16","voiv":14,"price":null,"priceLabel":"","source":"dowozimy.pl","type":"Restauracja"},
+{"id":"stek-skawina","name":"Restauracja Stek","city":"Skawina","address":"ul. Niepodległości 4","voiv":14,"price":null,"priceLabel":"","source":"mapa.targeo.pl, orlygastronomii.pl","type":"Restauracja"}
 ]

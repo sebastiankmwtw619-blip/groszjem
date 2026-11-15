@@ -30,5 +30,5 @@
 {"id":"krakus-krakow","name":"Bar Mleczny Krakus","city":"Kraków","address":"Podgórze","voiv":14,"price":null,"priceLabel":"","source":"palealetravel.beehiiv.com","type":"Bar mleczny"},
 {"id":"gornik-krakow","name":"Bar Mleczny Górnik","city":"Kraków","address":"","voiv":14,"price":null,"priceLabel":"","source":"afar.com","type":"Bar mleczny"},
 {"id":"centralny-krakow","name":"Bar Mleczny Centralny","city":"Kraków","address":"","voiv":14,"price":null,"priceLabel":"","source":"inyourpocket.com","type":"Bar mleczny"},
-{"id":"zakatek-smakow-skawina","name":"Zakątek Smaków","city":"Skawina","address":"ul. Jana Sobieskiego 4","voiv":14,"price":null,"priceLabel":"","source":"zgłoszenie autora aplikacji (15.11.2026)","type":"Restauracja"}
+{"id":"zakatek-smakow-skawina","name":"Zakątek Smaków","city":"Skawina","address":"ul. Jana Sobieskiego 4","voiv":14,"price":null,"priceLabel":"","source":"Google Maps","type":"Restauracja","mapsUrl":"https://maps.google.com/?cid=16062421478330579598"}
 ]

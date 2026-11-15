@@ -1,5 +1,5 @@
 // Service worker: aplikacja działa offline (powłoka i lista lokali z pamięci podręcznej).
-const CACHE = 'groszjem-v4';
+const CACHE = 'groszjem-v5';
 const SHELL = ['./', './index.html', './config.js', './places.json', './manifest.webmanifest', './vendor/supabase.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 

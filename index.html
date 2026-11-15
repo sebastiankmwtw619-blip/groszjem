@@ -295,7 +295,7 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
       '<main class="wrap stack" style="gap:18px">' +
       '<div style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">' + esc(p.type || 'Bar mleczny') + ' · ' + esc(W[p.voiv] || '') + '</span><h2 class="big">' + esc(p.name) + '</h2><span style="color:var(--muted)">' + esc(p.city) + (p.address ? ', ' + esc(p.address) : '') + '</span>' + (p.kind === 'sub' ? '<span><span class="badge">zgłoszony, niezweryfikowany</span></span>' : '') + '</div>' +
       hero +
-      '<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">' + ICON.nav + 'Prowadź (Google Maps)</a>' +
+      '<a class="btn ghost" href="' + (p.mapsUrl && /^https:\/\/maps\.google\.com\//.test(p.mapsUrl) ? esc(p.mapsUrl) : 'https://www.google.com/maps/search/?api=1&query=' + q) + '" target="_blank" rel="noopener">' + ICON.nav + 'Prowadź (Google Maps)</a>' +
       '<div class="rows"><h3 style="padding-bottom:4px">Informacje</h3>' +
       '<div class="row"><span>Źródło</span><span>' + esc(p.source) + '</span></div>' +
       (p.priceLabel && p.kind === 'verified' ? '<div class="row"><span>Cena wg źródła</span><span>' + esc(p.priceLabel) + '</span></div>' : '') +

@@ -3,6 +3,7 @@
 // Po założeniu darmowego konta Supabase wklej tu adres projektu i klucz "anon public"
 // (Supabase → Project Settings → API), a w SQL Editor uruchom plik supabase.sql.
 window.GJ_CONFIG = {
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: ''
+  SUPABASE_URL: 'https://aoeyjmtucobekcihkfor.supabase.co',
+  // Klucz publiczny (publishable) – bezpieczny w przeglądarce; dostęp ogranicza RLS z supabase.sql.
+  SUPABASE_ANON_KEY: 'sb_publishable_RIkOQAvWGKCMXLUYZ_DEUg_FBBkVtIC'
 };

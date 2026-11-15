@@ -151,7 +151,7 @@ h3 { margin: 0; font-size: 16px; font-weight: 600; }
       if (Store.mode !== 'cloud') return Promise.resolve();
       return new Promise(function (res) {
         var s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+        s.src = 'vendor/supabase.js'; // kopia z node_modules/@supabase/supabase-js (npm install)
         s.onload = function () { try { Store.sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY); } catch (e) { Store.mode = 'local'; } res(); };
         s.onerror = function () { Store.mode = 'offline'; res(); };
         document.head.appendChild(s);

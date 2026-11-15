@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grosz.jem</title>
+<meta name="description" content="Bary mleczne i tanie obiady w Polsce według województw.">
+<meta name="theme-color" content="#121212">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Grosz.jem">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<script src="config.js"></script>
+<style>
+:root {
+  --bg: #121212; --surface: #1F1F1F; --surface-2: #2A2A2A; --line: #333333;
+  --fg: #F5F5F5; --muted: #B3B3B3; --faint: #9A9A9A;
+  --accent: #FFD43B; --on-accent: #121212; --ok: #7DD3A0; --warn: #FFB07A;
+  --display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --body: Inter, 'Segoe UI', system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; -webkit-tap-highlight-color: transparent; padding-top: env(safe-area-inset-top, 0px); }
+button, input, select { font-family: inherit; font-size: inherit; color: inherit; }
+input, select { font-size: 16px; } /* iOS nie powiększa przy 16px */
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+.wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { padding-block: 20px 12px; display: flex; flex-direction: column; gap: 14px; }
+.brand { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.brand h1 { margin: 0; font-family: var(--display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+.brand h1 span { color: var(--accent); }
+.pill { font-size: 12px; font-weight: 600; color: var(--on-accent); background: var(--accent); padding: 6px 10px; border-radius: 999px; white-space: nowrap; }
+.search { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 0 14px; height: 48px; }
+.search input { flex: 1; min-width: 0; background: none; border: 0; outline: none; height: 46px; }
+.search input::placeholder, .field input::placeholder { color: var(--faint); }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-block: 0 12px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; height: 38px; padding: 0 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--line); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); padding-block: 0 10px; }
+main { flex: 1; padding-block: 0 24px; display: flex; flex-direction: column; gap: 10px; }
+.card { background: var(--surface); border-radius: 18px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; border: 0; text-align: left; cursor: pointer; width: 100%; }
+.card:active { background: #262626; }
+.card .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.card .name { font-size: 16px; font-weight: 600; }
+.card .where { font-size: 12px; color: var(--muted); }
+.card .src { font-size: 11px; color: var(--faint); }
+.price { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--accent); text-align: right; max-width: 110px; font-variant-numeric: tabular-nums; }
+.price.none { color: var(--faint); }
+.badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 6px; border-radius: 6px; background: var(--surface-2); color: var(--warn); }
+.badge.user { color: var(--ok); }
+.empty { padding: 20px; border-radius: 18px; border: 1.5px dashed #444; display: flex; flex-direction: column; gap: 12px; align-items: center; text-align: center; color: var(--muted); }
+.btn { height: 52px; border-radius: 14px; border: 0; background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; padding: 0 20px; }
+.btn.ghost { background: var(--surface); color: var(--fg); border: 1px solid var(--line); height: 48px; font-size: 15px; }
+.btn.small { height: 40px; font-size: 14px; padding: 0 14px; }
+.btn[disabled] { opacity: 0.5; cursor: default; }
+.note { font-size: 11px; color: var(--faint); margin: 4px 0 0; }
+.banner { margin-top: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+.banner > span { flex: 1; min-width: 0; }
+.banner b { color: var(--fg); }
+nav.tabs { position: sticky; bottom: 0; background: #181818; border-top: 1px solid #2A2A2A; display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom, 0px); }
+nav.tabs button { background: none; border: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 72px; min-height: 60px; font-size: 11px; font-weight: 500; color: var(--muted); cursor: pointer; }
+nav.tabs button[aria-current="page"] { color: var(--accent); font-weight: 600; }
+.bar { display: flex; align-items: center; gap: 12px; padding-block: 16px 8px; }
+.iconbtn { width: 44px; height: 44px; border-radius: 12px; border: 0; background: var(--surface); display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none; }
+.iconbtn[aria-pressed="true"] { color: var(--accent); }
+.eyebrow { font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+h2.big { margin: 0; font-family: var(--display); font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; text-wrap: balance; }
+h2.mid { margin: 0; font-family: var(--display); font-size: 22px; font-weight: 700; }
+h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.hero-price { background: var(--accent); color: var(--on-accent); border-radius: 18px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.hero-price strong { font-family: var(--display); font-size: 32px; line-height: 1; font-variant-numeric: tabular-nums; }
+.hero-price small { font-size: 11px; font-weight: 600; text-align: right; max-width: 140px; }
+.hero-price.none { background: var(--surface); color: var(--fg); }
+.rows { display: flex; flex-direction: column; }
+.row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 12px 0; border-bottom: 1px solid #2A2A2A; }
+.row span:first-child { color: var(--muted); }
+.row span:last-child { text-align: right; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label, .field .lbl { font-size: 13px; font-weight: 600; color: var(--muted); }
+.field input, .field select { height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); padding: 0 14px; width: 100%; }
+.two { display: flex; gap: 12px; flex-wrap: wrap; }
+.two > * { flex: 1 1 140px; min-width: 0; }
+.err { color: var(--warn); font-size: 13px; margin: 0; }
+.done { padding: 40px 12px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.done .tick { width: 72px; height: 72px; border-radius: 36px; background: var(--accent); display: flex; align-items: center; justify-content: center; }
+.hist { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid #2A2A2A; font-size: 14px; }
+.hist b { font-family: var(--display); color: var(--accent); white-space: nowrap; }
+.sr { position: absolute; left: -9999px; }
+.sheet { position: fixed; inset: auto 0 0 0; z-index: 20; background: #1A1A1A; border-top: 1px solid var(--line); border-radius: 20px 20px 0 0; padding: 20px max(16px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -8px 30px rgba(0,0,0,.5); }
+.sheet ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--muted); }
+.sheet ol b { color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="view" style="flex:1; display:flex; flex-direction:column"></div>
+  <nav class="tabs wrap" aria-label="Menu">
+    <button type="button" data-tab="lista"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Lista</button>
+    <button type="button" data-tab="ulubione"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>Ulubione</button>
+    <button type="button" data-tab="zglos"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Zgłoś</button>
+  </nav>
+</div>
+
+<div id="iosSheet" class="sheet" role="dialog" aria-labelledby="iosTitle" hidden>
+  <h2 id="iosTitle" class="mid" style="font-size:20px">Zainstaluj na iPhonie</h2>
+  <ol>
+    <li>Otwórz tę stronę w <b>Safari</b>.</li>
+    <li>Dotknij <b>Udostępnij</b> (kwadrat ze strzałką w górę).</li>
+    <li>Wybierz <b>Do ekranu początkowego</b>, potem <b>Dodaj</b>.</li>
+  </ol>
+  <button type="button" class="btn ghost" id="iosClose">Rozumiem</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var W = ['Zachodniopomorskie','Pomorskie','Warmińsko-mazurskie','Podlaskie','Lubuskie','Wielkopolskie','Kujawsko-pomorskie','Mazowieckie','Dolnośląskie','Łódzkie','Świętokrzyskie','Lubelskie','Opolskie','Śląskie','Małopolskie','Podkarpackie'];
+  var KINDS = ['Zestaw obiadowy','Zupa','Drugie danie','Pierogi'];
+  var TYPES = ['Bar mleczny','Jadłodajnia','Stołówka','Inny'];
+  var ICON = {
+    back: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    heart: function (on) { return '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="' + (on ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>'; },
+    pin: '<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+    search: '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A9A9A" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
+    tick: '<svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#121212" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>',
+    nav: '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>'
+  };
+
+  /* ---------- Przechowywanie danych: lokalnie albo w Supabase ---------- */
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  var cfg = window.GJ_CONFIG || {};
+  var Store = {
+    mode: cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY ? 'cloud' : 'local',
+    sb: null,
+    init: function () {
+      if (Store.mode !== 'cloud') return Promise.resolve();
+      return new Promise(function (res) {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+        s.onload = function () { try { Store.sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY); } catch (e) { Store.mode = 'local'; } res(); };
+        s.onerror = function () { Store.mode = 'offline'; res(); };
+        document.head.appendChild(s);
+      });
+    },
+    load: function () {
+      if (Store.mode !== 'cloud') return Promise.resolve({ prices: lsGet('gj-prices', []), subs: lsGet('gj-subs', []) });
+      return Promise.all([
+        Store.sb.from('prices').select('*').order('created_at', { ascending: false }).limit(1000),
+        Store.sb.from('submissions').select('*').order('created_at', { ascending: false }).limit(500)
+      ]).then(function (r) {
+        if (r[0].error || r[1].error) throw r[0].error || r[1].error;
+        var data = {
+          prices: r[0].data.map(function (p) { return { id: p.id, placeId: p.place_id, price: Number(p.price), date: p.date, kind: p.kind, dish: p.dish, createdAt: Date.parse(p.created_at) }; }),
+          subs: r[1].data.map(function (s) { return { id: s.id, name: s.name, city: s.city, address: s.address, voiv: s.voiv, type: s.type, price: s.price == null ? null : Number(s.price), createdAt: Date.parse(s.created_at) }; })
+        };
+        lsSet('gj-cache', data);
+        return data;
+      }).catch(function () { return lsGet('gj-cache', { prices: [], subs: [] }); });
+    },
+    addPrice: function (p) {
+      if (Store.mode !== 'cloud') { var l = lsGet('gj-prices', []); p.id = uid(); p.createdAt = Date.now(); l.unshift(p); lsSet('gj-prices', l); return Promise.resolve(); }
+      return Store.sb.from('prices').insert({ place_id: p.placeId, price: p.price, date: p.date, kind: p.kind, dish: p.dish })
+        .then(function (r) { if (r.error) throw r.error; });
+    },
+    addSub: function (s) {
+      if (Store.mode !== 'cloud') { var l = lsGet('gj-subs', []); s.id = uid(); s.createdAt = Date.now(); l.unshift(s); lsSet('gj-subs', l); return Promise.resolve(); }
+      return Store.sb.from('submissions').insert({ name: s.name, city: s.city, address: s.address, voiv: s.voiv, type: s.type, price: s.price })
+        .then(function (r) { if (r.error) throw r.error; });
+    }
+  };
+
+  /* ---------- Stan aplikacji ---------- */
+  var S = { places: [], prices: [], subs: [], ready: false, view: 'lista', placeId: null, sel: -1, q: '', fav: lsGet('gj-fav', []), flash: null };
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function zl(n) { return (Math.round(n * 100) / 100).toFixed(2).replace('.', ',').replace(',00', '') + ' zł'; }
+  function fmtDate(d) { if (!d) return ''; var p = String(d).slice(0, 10).split('-'); return p.length === 3 ? p[2] + '.' + p[1] + '.' + p[0] : d; }
+
+  function pricesFor(id) {
+    return S.prices.filter(function (p) { return p.placeId === id && typeof p.price === 'number'; })
+      .sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')) || (b.createdAt || 0) - (a.createdAt || 0); });
+  }
+  function allPlaces() {
+    var verified = S.places.map(function (p) { return Object.assign({ kind: 'verified' }, p); });
+    var subs = S.subs.map(function (s) {
+      return { id: 'sub-' + s.id, name: s.name, city: s.city, address: s.address, voiv: s.voiv, type: s.type, price: typeof s.price === 'number' ? s.price : null, priceLabel: '', source: 'zgłoszenie użytkownika', kind: 'sub' };
+    });
+    return verified.concat(subs).map(function (p) {
+      var reps = pricesFor(p.id);
+      if (reps.length) { p.eff = reps[0].price; p.effLabel = zl(reps[0].price); p.effBy = 'user'; }
+      else if (typeof p.price === 'number') { p.eff = p.price; p.effLabel = p.priceLabel || zl(p.price); p.effBy = p.kind === 'sub' ? 'user' : 'source'; }
+      else { p.eff = null; p.effLabel = p.priceLabel || 'cena ?'; p.effBy = p.priceLabel ? 'source' : null; }
+      return p;
+    });
+  }
+  function byPrice(a, b) { return (a.eff == null ? 9999 : a.eff) - (b.eff == null ? 9999 : b.eff) || a.name.localeCompare(b.name, 'pl'); }
+  function findPlace(id) { var all = allPlaces(); for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i]; return null; }
+
+  function go(view, placeId) {
+    S.view = view; S.placeId = placeId || null; S.flash = null;
+    var h = view === 'lokal' ? 'lokal-' + placeId : view;
+    try { if (location.hash.slice(1) !== h) history.pushState(null, '', '#' + h); } catch (e) {}
+    render(); window.scrollTo(0, 0);
+  }
+
+  /* ---------- Instalacja (Android: przycisk, iPhone: instrukcja) ---------- */
+  var deferredPrompt = null;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferredPrompt = e; render(); });
+  window.addEventListener('appinstalled', function () { deferredPrompt = null; isStandalone = true; render(); });
+  function installBanner() {
+    if (isStandalone || lsGet('gj-install-hidden', false)) return '';
+    if (!deferredPrompt && !isIOS) return '';
+    return '<div class="banner"><span><b>Zainstaluj Grosz.jem</b><br>Ikona na ekranie telefonu, działa też bez internetu.</span>' +
+      '<button type="button" class="btn small" id="installBtn">Zainstaluj</button>' +
+      '<button type="button" class="iconbtn" id="installHide" aria-label="Ukryj" style="width:36px;height:36px">✕</button></div>';
+  }
+  function modeBanner() {
+    if (Store.mode === 'cloud') return '';
+    return '<p class="note" style="margin:0">' + (Store.mode === 'offline' ? 'Brak internetu: pokazuję zapisane dane.' : 'Tryb lokalny: zgłoszone ceny i lokale widać tylko na tym urządzeniu.') + '</p>';
+  }
+
+  /* ---------- Widoki ---------- */
+  function render() {
+    var v = document.getElementById('view');
+    var tab = S.view === 'lokal' || S.view === 'cena' ? 'lista' : S.view;
+    document.querySelectorAll('nav.tabs button').forEach(function (b) { if (b.dataset.tab === tab) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    if (S.view === 'lokal') v.innerHTML = viewPlace();
+    else if (S.view === 'cena') v.innerHTML = viewPrice();
+    else if (S.view === 'zglos') v.innerHTML = viewReport();
+    else if (S.view === 'ulubione') v.innerHTML = viewFav();
+    else v.innerHTML = viewList();
+    bind();
+  }
+
+  function card(p) {
+    var badge = p.kind === 'sub' ? ' <span class="badge">niezweryfikowany</span>' : '';
+    var priceBadge = p.effBy === 'user' && p.eff != null ? '<span class="badge user">od użytkowników</span>' : '';
+    return '<button type="button" class="card" data-open="' + esc(p.id) + '"><span class="info">' +
+      '<span class="name">' + esc(p.name) + badge + '</span>' +
+      '<span class="where">' + ICON.pin + ' ' + esc(p.city) + (p.address ? ', ' + esc(p.address) : '') + '</span>' +
+      '<span class="src">' + esc(W[p.voiv] || '') + ' · źródło: ' + esc(p.source) + '</span></span>' +
+      '<span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="price' + (p.eff == null && !p.priceLabel ? ' none' : '') + '">' + esc(p.effLabel) + '</span>' + priceBadge + '</span></button>';
+  }
+
+  function viewList() {
+    var all = allPlaces(), q = S.q.trim().toLowerCase();
+    var list = all.filter(function (p) {
+      return (S.sel < 0 || p.voiv === S.sel) && (!q || (p.city || '').toLowerCase().indexOf(q) >= 0 || p.name.toLowerCase().indexOf(q) >= 0);
+    }).sort(byPrice);
+    var chips = '<button type="button" class="chip" data-sel="-1" aria-pressed="' + (S.sel < 0) + '">Cała Polska</button>' +
+      W.map(function (w, i) { return '<button type="button" class="chip" data-sel="' + i + '" aria-pressed="' + (S.sel === i) + '">' + w + '</button>'; }).join('');
+    var body = !S.ready ? '<div class="empty">Wczytuję lokale…</div>' : (list.length ? list.map(card).join('') :
+      '<div class="empty">Brak lokali dla tego wyboru.<button type="button" class="btn small" data-go="zglos">Zgłoś bar mleczny</button></div>');
+    return '<header class="top wrap"><div class="brand"><h1>Grosz<span>.</span>jem</h1><span class="pill">' + all.length + ' lokali</span></div>' +
+      installBanner() +
+      '<label for="q" class="sr">Szukaj miasta lub lokalu</label><div class="search">' + ICON.search +
+      '<input id="q" type="search" placeholder="Miasto lub lokal, np. Kraków" value="' + esc(S.q) + '" autocomplete="off" enterkeyhint="search"></div></header>' +
+      '<div class="chips wrap" role="group" aria-label="Województwo">' + chips + '</div>' +
+      '<div class="meta wrap"><span>' + list.length + ' wyników · ' + (S.sel < 0 ? 'cała Polska' : W[S.sel]) + '</span><span style="color:var(--fg);font-weight:600">Najtańsze najpierw</span></div>' +
+      '<main class="wrap">' + body + '<p class="note">Ceny ze źródeł internetowych (15.11.2026) mogą być nieaktualne. Ceny od użytkowników mają datę zgłoszenia.</p>' + modeBanner() + '</main>';
+  }
+
+  function viewPlace() {
+    var p = findPlace(S.placeId);
+    if (!p) return '<div class="wrap bar"><button type="button" class="iconbtn" data-go="lista" aria-label="Wróć do listy">' + ICON.back + '</button></div><main class="wrap"><div class="empty">' + (S.ready ? 'Nie znaleziono lokalu.' : 'Wczytuję…') + '</div></main>';
+    var fav = S.fav.indexOf(p.id) >= 0, reps = pricesFor(p.id), hero;
+    if (p.eff != null || p.priceLabel) {
+      var who = p.effBy === 'user' ? (reps.length ? 'zgłoszenie z ' + fmtDate(reps[0].date) : 'podane przy zgłoszeniu') : 'wg ' + esc(p.source) + ', data nieznana';
+      hero = '<div class="hero-price"><span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:600">' + (reps.length ? esc(reps[0].dish || reps[0].kind) : 'Najniższa znana cena') + '</span><strong>' + esc(p.effLabel) + '</strong></span><small>' + who + '</small></div>';
+    } else {
+      hero = '<div class="hero-price none"><span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:600;color:var(--muted)">Cena</span><strong style="color:var(--faint)">brak danych</strong></span><small style="color:var(--muted)">Byłeś tu? Dodaj cenę.</small></div>';
+    }
+    var q = encodeURIComponent(p.name + ' ' + (p.address || '') + ' ' + p.city);
+    var hist = reps.length ? reps.map(function (r) { return '<div class="hist"><span>' + esc(r.dish || r.kind) + ' <span style="color:var(--faint);font-size:12px">· ' + fmtDate(r.date) + '</span></span><b>' + zl(r.price) + '</b></div>'; }).join('') : '<p class="note" style="font-size:13px">Nikt jeszcze nie zgłosił ceny.</p>';
+    return '<div class="wrap bar" style="justify-content:space-between"><button type="button" class="iconbtn" data-go="lista" aria-label="Wróć do listy">' + ICON.back + '</button>' +
+      '<button type="button" class="iconbtn" data-fav="' + esc(p.id) + '" aria-pressed="' + fav + '" aria-label="' + (fav ? 'Usuń z ulubionych' : 'Zapisz w ulubionych') + '">' + ICON.heart(fav) + '</button></div>' +
+      '<main class="wrap stack" style="gap:18px">' +
+      '<div style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">' + esc(p.type || 'Bar mleczny') + ' · ' + esc(W[p.voiv] || '') + '</span><h2 class="big">' + esc(p.name) + '</h2><span style="color:var(--muted)">' + esc(p.city) + (p.address ? ', ' + esc(p.address) : '') + '</span>' + (p.kind === 'sub' ? '<span><span class="badge">zgłoszony, niezweryfikowany</span></span>' : '') + '</div>' +
+      hero +
+      '<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=' + q + '" target="_blank" rel="noopener">' + ICON.nav + 'Prowadź (Google Maps)</a>' +
+      '<div class="rows"><h3 style="padding-bottom:4px">Informacje</h3>' +
+      '<div class="row"><span>Źródło</span><span>' + esc(p.source) + '</span></div>' +
+      (p.priceLabel && p.kind !== 'sub' ? '<div class="row"><span>Cena wg źródła</span><span>' + esc(p.priceLabel) + '</span></div>' : '') +
+      '<div class="row"><span>Zgłoszenia cen</span><span>' + reps.length + ' od użytkowników</span></div></div>' +
+      '<div><h3>Zgłoszone ceny</h3>' + hist + '</div>' +
+      '<button type="button" class="btn" data-go="cena" data-id="' + esc(p.id) + '">Dodaj aktualną cenę</button></main>';
+  }
+
+  function viewPrice() {
+    var p = findPlace(S.placeId);
+    if (S.flash === 'price-ok') {
+      return '<main class="wrap"><div class="done"><div class="tick">' + ICON.tick + '</div><h2 class="mid">Dziękujemy!</h2><p style="color:var(--muted);margin:0">' + (Store.mode === 'cloud' ? 'Twoja cena jest już widoczna dla wszystkich.' : 'Cena zapisana na tym urządzeniu.') + '</p>' +
+        '<button type="button" class="btn ghost" data-open="' + esc(S.placeId) + '">Wróć do lokalu</button></div></main>';
+    }
+    var today = new Date().toISOString().slice(0, 10);
+    return '<div class="wrap bar"><button type="button" class="iconbtn" data-open="' + esc(S.placeId) + '" aria-label="Wróć do lokalu">' + ICON.back + '</button><div><div style="font-size:12px;color:var(--muted)">' + esc(p ? p.name + ' · ' + p.city : '') + '</div><h2 class="mid">Dodaj cenę</h2></div></div>' +
+      '<form id="fPrice" class="wrap stack" style="padding-block:8px 24px" novalidate>' +
+      '<div class="field"><span class="lbl">Rodzaj</span><div class="chips" style="flex-wrap:wrap;padding:0" role="group" aria-label="Rodzaj">' +
+      KINDS.map(function (k, i) { return '<button type="button" class="chip" data-kind="' + i + '" aria-pressed="' + (i === 0) + '">' + k + '</button>'; }).join('') + '</div></div>' +
+      '<div class="field"><label for="dish">Danie</label><input id="dish" type="text" maxlength="80" placeholder="np. pierogi ruskie"></div>' +
+      '<div class="two"><div class="field"><label for="price">Cena (zł)</label><input id="price" type="text" inputmode="decimal" placeholder="0,00" required style="color:var(--accent);font-weight:700;font-family:var(--display);font-size:18px"></div>' +
+      '<div class="field"><label for="date">Data</label><input id="date" type="date" value="' + today + '" max="' + today + '" required></div></div>' +
+      '<p id="err" class="err" hidden></p>' +
+      '<button type="submit" class="btn">Wyślij cenę</button>' +
+      '<p class="note">Podawaj tylko ceny, które widziałeś w menu.</p></form>';
+  }
+
+  function viewReport() {
+    if (S.flash === 'sub-ok') {
+      return '<main class="wrap"><div class="done"><div class="tick">' + ICON.tick + '</div><h2 class="mid">Zgłoszenie wysłane</h2><p style="color:var(--muted);margin:0">Lokal jest już na liście z oznaczeniem „niezweryfikowany”.</p>' +
+        '<button type="button" class="btn ghost" data-go="zglos">Zgłoś kolejny</button></div></main>';
+    }
+    return '<header class="top wrap"><h2 class="mid" style="font-size:26px">Zgłoś tani lokal</h2><p style="margin:0;color:var(--muted)">Brakuje nam danych z lubuskiego i podkarpackiego.</p></header>' +
+      '<form id="fSub" class="wrap stack" style="padding-block:4px 24px" novalidate>' +
+      '<div class="field"><label for="sName">Nazwa lokalu</label><input id="sName" type="text" maxlength="80" required placeholder="np. Bar Mleczny Pod Lipami"></div>' +
+      '<div class="field"><label for="sVoiv">Województwo</label><select id="sVoiv">' + W.map(function (w, i) { return '<option value="' + i + '"' + (i === 4 ? ' selected' : '') + '>' + w + '</option>'; }).join('') + '</select></div>' +
+      '<div class="two"><div class="field"><label for="sCity">Miasto</label><input id="sCity" type="text" maxlength="40" required placeholder="np. Rzeszów"></div>' +
+      '<div class="field"><label for="sAddr">Ulica i numer</label><input id="sAddr" type="text" maxlength="60" placeholder="ul. …"></div></div>' +
+      '<div class="field"><span class="lbl">Typ lokalu</span><div class="chips" style="flex-wrap:wrap;padding:0" role="group" aria-label="Typ lokalu">' +
+      TYPES.map(function (t, i) { return '<button type="button" class="chip" data-type="' + i + '" aria-pressed="' + (i === 0) + '">' + t + '</button>'; }).join('') + '</div></div>' +
+      '<div class="field"><label for="sPrice">Cena obiadu (opcjonalnie, zł)</label><input id="sPrice" type="text" inputmode="decimal" placeholder="zł"></div>' +
+      '<p id="err" class="err" hidden></p>' +
+      '<button type="submit" class="btn">Wyślij zgłoszenie</button>' + modeBanner() + '</form>';
+  }
+
+  function viewFav() {
+    var all = allPlaces();
+    var list = S.fav.map(function (id) { for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i]; return null; }).filter(Boolean);
+    var body = list.length ? list.map(card).join('') :
+      '<div class="empty" style="margin-top:24px">Nie masz jeszcze ulubionych lokali. Otwórz lokal i dotknij serca.<button type="button" class="btn small" data-go="lista">Przeglądaj listę</button></div>';
+    return '<header class="top wrap"><div class="brand"><h2 class="mid" style="font-size:26px">Ulubione</h2><span style="font-size:13px;color:var(--muted)">' + list.length + ' zapisane</span></div></header>' +
+      '<main class="wrap">' + body + '</main>';
+  }
+
+  function showErr(msg) { var e = document.getElementById('err'); if (e) { e.textContent = msg; e.hidden = false; } }
+  function num(v) { var n = parseFloat(String(v).replace(',', '.').replace(/[^0-9.]/g, '')); return isNaN(n) ? null : Math.round(n * 100) / 100; }
+
+  function bind() {
+    var v = document.getElementById('view');
+    v.querySelectorAll('[data-open]').forEach(function (b) { b.onclick = function () { go('lokal', b.dataset.open); }; });
+    v.querySelectorAll('[data-go]').forEach(function (b) { b.onclick = function () { go(b.dataset.go, b.dataset.id || S.placeId); }; });
+    v.querySelectorAll('[data-sel]').forEach(function (b) { b.onclick = function () { S.sel = parseInt(b.dataset.sel, 10); render(); }; });
+    v.querySelectorAll('[data-fav]').forEach(function (b) { b.onclick = function () {
+      var id = b.dataset.fav, i = S.fav.indexOf(id);
+      if (i >= 0) S.fav.splice(i, 1); else S.fav.push(id);
+      lsSet('gj-fav', S.fav); render();
+    }; });
+    var q = document.getElementById('q');
+    if (q) q.oninput = function () {
+      S.q = q.value; var pos = q.selectionStart; render();
+      var n = document.getElementById('q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {}
+    };
+    var ib = document.getElementById('installBtn');
+    if (ib) ib.onclick = function () {
+      if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.finally(function () { deferredPrompt = null; render(); }); }
+      else document.getElementById('iosSheet').hidden = false;
+    };
+    var ih = document.getElementById('installHide');
+    if (ih) ih.onclick = function () { lsSet('gj-install-hidden', true); render(); };
+
+    function chipGroup(attr) {
+      v.querySelectorAll('[' + attr + ']').forEach(function (b) { b.onclick = function () {
+        v.querySelectorAll('[' + attr + ']').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+        b.setAttribute('aria-pressed', 'true');
+      }; });
+    }
+    chipGroup('data-kind'); chipGroup('data-type');
+    function picked(attr, arr) { var b = v.querySelector('[' + attr + '][aria-pressed="true"]'); return arr[b ? parseInt(b.getAttribute(attr), 10) : 0]; }
+
+    var fp = document.getElementById('fPrice');
+    if (fp) fp.onsubmit = function (e) {
+      e.preventDefault();
+      var price = num(document.getElementById('price').value), date = document.getElementById('date').value;
+      if (!(price >= 1 && price <= 200)) return showErr('Wpisz cenę od 1 do 200 zł.');
+      if (!date) return showErr('Wybierz datę, kiedy widziałeś tę cenę.');
+      var btn = fp.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Wysyłam…';
+      var rec = { placeId: S.placeId, price: price, date: date, kind: picked('data-kind', KINDS), dish: document.getElementById('dish').value.trim().slice(0, 80) };
+      Store.addPrice(rec).then(refresh).then(function () { S.flash = 'price-ok'; render(); })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Wyślij cenę'; showErr('Nie udało się zapisać ceny. Sprawdź internet i spróbuj ponownie.'); });
+    };
+
+    var fs = document.getElementById('fSub');
+    if (fs) fs.onsubmit = function (e) {
+      e.preventDefault();
+      var name = document.getElementById('sName').value.trim(), city = document.getElementById('sCity').value.trim();
+      var pr = document.getElementById('sPrice').value.trim(), price = pr ? num(pr) : null;
+      if (!name) return showErr('Podaj nazwę lokalu.');
+      if (!city) return showErr('Podaj miasto.');
+      if (pr && !(price >= 1 && price <= 200)) return showErr('Cena musi mieścić się między 1 a 200 zł.');
+      var btn = fs.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Wysyłam…';
+      var rec = { name: name.slice(0, 80), city: city.slice(0, 40), address: document.getElementById('sAddr').value.trim().slice(0, 60), voiv: parseInt(document.getElementById('sVoiv').value, 10), type: picked('data-type', TYPES), price: price };
+      Store.addSub(rec).then(refresh).then(function () { S.flash = 'sub-ok'; render(); })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Wyślij zgłoszenie'; showErr('Nie udało się wysłać zgłoszenia. Sprawdź internet i spróbuj ponownie.'); });
+    };
+  }
+
+  document.querySelectorAll('nav.tabs button').forEach(function (b) { b.onclick = function () { go(b.dataset.tab); }; });
+  document.getElementById('iosClose').onclick = function () { document.getElementById('iosSheet').hidden = true; };
+
+  function fromHash() {
+    var h = (location.hash || '').slice(1);
+    S.flash = null;
+    if (h === 'ulubione' || h === 'zglos' || h === 'lista') { S.view = h; S.placeId = null; }
+    else if (h.indexOf('lokal-') === 0) { S.view = 'lokal'; S.placeId = h.slice(6); }
+    else { S.view = 'lista'; S.placeId = null; }
+  }
+  window.addEventListener('popstate', function () { fromHash(); render(); });
+
+  function refresh() { return Store.load().then(function (d) { S.prices = d.prices; S.subs = d.subs; }); }
+  function isTyping() { var a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'SELECT'); }
+
+  fromHash();
+  render();
+  Promise.all([
+    fetch('places.json').then(function (r) { return r.json(); }),
+    Store.init().then(refresh)
+  ]).then(function (r) { S.places = r[0]; S.ready = true; render(); })
+    .catch(function () { S.ready = true; render(); });
+
+  // Odśwież wspólne dane co minutę i po powrocie do aplikacji
+  setInterval(function () { if (Store.mode === 'cloud' && !isTyping()) refresh().then(render); }, 60000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && Store.mode === 'cloud') refresh().then(function () { if (!isTyping()) render(); }); });
+
+  if ('serviceWorker' in navigator) window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+})();
+</script>
+</body>
+</html>
